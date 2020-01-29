@@ -7,7 +7,7 @@ def test_lidar(cfg):
 
     V = dk.vehicle.Vehicle()
 
-    from dk.parts.lidar import BreezySLAM, RPLidar, LidarPlot, MapToImage
+    from donkeycar.parts.lidar import BreezySLAM, RPLidar, LidarPlot, MapToImage
 
     rplidar = RPLidar()
     V.add(rplidar, outputs=['distances', 'angles'], threaded=True)
