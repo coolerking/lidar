@@ -15,11 +15,13 @@ def test_lidar(cfg):
     lidarplot = LidarPlot()
     V.add(lidarplot, inputs=['distances', 'angles'], outputs=['frame'])
 
-    slam = BreezySLAM()
-    V.add(slam, inputs=['distances', 'angles', 'frame'], outputs=['x', 'y', 'rad'])
-
     m2i = MapToImage()
     V.add(m2i, inputs=['frame'], outputs=['img_array'])
+
+    slam = BreezySLAM()
+    V.add(slam, inputs=['distances', 'angles', 'img_array'], outputs=['x', 'y', 'rad'])
+
+
 
     try:
         V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
