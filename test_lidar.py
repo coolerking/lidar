@@ -60,7 +60,7 @@ def test_lidar(cfg):
             degree = math.degrees(rad)
             xcm = float(x)/10.0
             ycm = float(y)/10.0
-            print('{:.5g}'.format(degree))
+            print('{:.5g},{:.5g},{:.5g}'.format(xcm, ycm, degree))
             #print('[BreezySLAM] x:{:.3g}cm , y:{:.3g}cm , theta:{:.3g}degree(s)'.format(xcm, ycm, degree))
         def shutdown(self):
             pass
