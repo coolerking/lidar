@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from time import sleep
+import math
 import donkeycar as dk
 
 
@@ -56,7 +57,8 @@ def test_lidar(cfg):
     
     class PrintB:
         def run(self, x, y, rad):
-            print('[BreezySLAM] x:{}, y:{}, rad:{}'.format(str(x), str(y), str(rad)))
+            degree = math.degree(rad)
+            print('[BreezySLAM] x:{:.6g}, y:{:.6g}, rad:{:.5g}'.format(x, x, degree))
         def shutdown(self):
             pass
     V.add(PrintB(), inputs=['x', 'y', 'rad'])
