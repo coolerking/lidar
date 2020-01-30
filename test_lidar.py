@@ -30,7 +30,7 @@ def test_lidar(cfg):
     class PrintLidar(object):
         def run(self, frame):
             print('[LidarPlot] frame:{}'.format(str(type(frame))))
-            print('[RPLidar] frame:{} a:{}'.format(str(frame)))
+            print('[LidarPlot] frame:{}'.format(str(frame)))
         def shutdown(self):
             pass
     V.add(PrintLidar(), inputs=['frame'])
