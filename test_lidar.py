@@ -57,7 +57,9 @@ def test_lidar(cfg):
     
     class PrintB:
         def run(self, x, y, rad):
-            degree = math.degrees(rad) + 180.0
+            degree = math.degrees(rad)
+            if degree >= 180.0:
+                degree = (360.0 - degree) * (-1.0)
             xcm = float(x)/10.0
             ycm = float(y)/10.0
             print('{:.5g},{:.5g},{:.5g}'.format(xcm, ycm, degree))
