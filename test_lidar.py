@@ -23,10 +23,18 @@ def test_lidar(cfg):
     V.add(PrintLidar(), inputs=['distances', 'angles'])
     '''
 
+    from donkeycar.parts.lidar import BreezyMap
+    bmap = BreezyMap()
+    V.add(bmap, outputs=['map_bytes'])
+
+
+    '''
     from donkeycar.parts.lidar import LidarPlot
     lidarplot = LidarPlot()
     V.add(lidarplot, inputs=['distances', 'angles'], outputs=['frame'])
+    '''
 
+    '''
     class PrintLidar(object):
         def run(self, frame):
             print('[LidarPlot] frame:{}'.format(str(type(frame))))
@@ -35,15 +43,23 @@ def test_lidar(cfg):
             pass
     V.add(PrintLidar(), inputs=['frame'])
     '''
+
+    '''
     from donkeycar.parts.lidar import MapToImage
     m2i = MapToImage()
     V.add(m2i, inputs=['frame'], outputs=['img_array'])
+    '''
 
     from donkeycar.parts.lidar import BreezySLAM
     slam = BreezySLAM()
-    V.add(slam, inputs=['distances', 'angles', 'img_array'], outputs=['x', 'y', 'rad'])
-    '''
-
+    V.add(slam, inputs=['distances', 'angles', 'map_bytes'], outputs=['x', 'y', 'rad'])
+    
+    class PrintB:
+        def run(self, x, y, rad):
+            print('[BreezySLAM] x:{}, y:{}, rad:{}'.format(str(x), str(y), str(rad)))
+        def shutdown(self):
+            pass
+    V.add(PrintB(), inputs=['x', 'y', 'rad'])
 
     try:
         V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
