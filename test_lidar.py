@@ -69,7 +69,7 @@ def test_lidar(cfg):
     V.add(PrintB(), inputs=['x', 'y', 'rad'])
 
     try:
-        V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
+        V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=(60/cfg.DRIVE_LOOP_HZ)*60*10)
     except KeyboardInterrupt:
         print('exit')
     finally:
