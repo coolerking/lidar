@@ -58,7 +58,9 @@ def test_lidar(cfg):
     class PrintB:
         def run(self, x, y, rad):
             degree = math.degrees(rad)
-            print('[BreezySLAM] x:{:.6g}, y:{:.6g}, rad:{:.5g}'.format(x, x, degree))
+            xcm = float(x)/10.0
+            ycm = float(y)/10.0
+            print('[BreezySLAM] x:{:.6g}cm , y:{:.6g}cm , rad:{:.5g}degree(s)'.format(xcm, ycm, degree))
         def shutdown(self):
             pass
     V.add(PrintB(), inputs=['x', 'y', 'rad'])
