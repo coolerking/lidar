@@ -16,6 +16,7 @@ def test_lidar(cfg):
     class PrintLidar(object):
         def run(self, distances, angles):
             print('[RPLidar] d:{} a:{}'.format(str(distances), str(angles)))
+            print('[RPLidar] d:{} a:{}'.format(str(len(distances)), str(len(angles))))
         def shutdown(self):
             pass
     V.add(PrintLidar(), inputs=['distances', 'angles'])
