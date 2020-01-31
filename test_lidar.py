@@ -28,12 +28,9 @@ def test_lidar(cfg):
     bmap = BreezyMap()
     V.add(bmap, outputs=['map_bytes'])
 
-
-    '''
     from donkeycar.parts.lidar import LidarPlot
     lidarplot = LidarPlot()
     V.add(lidarplot, inputs=['distances', 'angles'], outputs=['frame'])
-    '''
 
     '''
     class PrintLidar(object):
@@ -45,11 +42,10 @@ def test_lidar(cfg):
     V.add(PrintLidar(), inputs=['frame'])
     '''
 
-    '''
     from donkeycar.parts.lidar import MapToImage
     m2i = MapToImage()
-    V.add(m2i, inputs=['frame'], outputs=['img_array'])
-    '''
+    V.add(m2i, inputs=['frame'], outputs=['image_array'])
+
 
     from donkeycar.parts.lidar import BreezySLAM
     slam = BreezySLAM()
@@ -68,8 +64,22 @@ def test_lidar(cfg):
             pass
     V.add(PrintB(), inputs=['x', 'y', 'rad'])
 
+
+    inputs=['image_array',
+            'x', 'y', 
+            'rad']
+
+    types=['image_array',
+           'float', 'float',
+           'float']
+
+    from donkeycar.parts.datastore import TubHandler
+    th = TubHandler(path=cfg.DATA_PATH)
+    tub = th.new_tub_writer(inputs=inputs, types=types, user_meta=[])
+    V.add(tub, inputs=inputs, outputs=["tub/num_records"])
+
     try:
-        V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.DRIVE_LOOP_HZ*60*10)
+        V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
     except KeyboardInterrupt:
         print('exit')
     finally:
