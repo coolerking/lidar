@@ -43,7 +43,8 @@ def test_lidar(cfg):
     '''
 
     from donkeycar.parts.lidar import MapToImage
-    m2i = MapToImage()
+    m2i = MapToImage(resolution=(500,500,3))
+    # 750000 -> (500,500)
     V.add(m2i, inputs=['frame'], outputs=['image_array'])
 
 
