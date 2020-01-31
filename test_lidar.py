@@ -81,7 +81,7 @@ def test_lidar(cfg):
 
     try:
         V.start(rate_hz=cfg.DRIVE_LOOP_HZ,
-            max_loop_count=cfg.DRIVE_LOOP_HZ * 60 * 10) # 10mins
+            max_loop_count=cfg.DRIVE_LOOP_HZ * 60) # 1min
             ## max_loop_count=cfg.MAX_LOOPS) # infinity
     except KeyboardInterrupt:
         print('exit')
