@@ -10,7 +10,7 @@ def test_rs(cfg):
     V = dk.vehicle.Vehicle()
 
     from donkeycar.parts.realsense2 import RS_T265
-    rs = RS_T265()
+    rs = RS_T265(image_output=True)
     V.add(rs, outputs=['pos', 'vel', 'acc', 'image_array'], threaded=False)
 
     class Split(object):
