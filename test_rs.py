@@ -21,15 +21,16 @@ def test_rs(cfg):
     V.add(Split(), inputs=['pos', 'vel', 'acc'],
         outputs=['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
 
+    # image shape (800, 848)
     class ImageNoneCheck(object):
         def __init__(self, cfg):
             self.cfg = cfg
         def run(self, image_array):
             if image_array is None:
-                print('[RS] image_array is None')
+                #print('[RS] image_array is None')
                 return np.zeros((self.cfg.IMAGE_H, self.cfg.IMAGE_W, self.cfg.IMAGE_DEPTH), dtype=np.uint8)
             else:
-                print('[RS] image.shape:{}'.format(str(image_array.shape)))
+                #print('[RS] image.shape:{}'.format(str(image_array.shape)))
                 return image_array
         def shutdown(self):
             pass
@@ -37,10 +38,11 @@ def test_rs(cfg):
 
     class PrintRS(object):
         def run(self, image_array, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z):
-            print((image_array is None))
-            print(type(image_array))
-            print(image_array.shape)
-            print('[RS] pos:({:.5g}, {:.5g}, {:.5g}) vel:({:.5g}, {:.5g}, {:.5g}) acc:({:.5g}, {:.5g}, {:.5g})'.format(
+            #print((image_array is None))
+            #print(type(image_array))
+            #print(image_array.shape)
+            #print('[RS] pos:({:.5g}, {:.5g}, {:.5g}) vel:({:.5g}, {:.5g}, {:.5g}) acc:({:.5g}, {:.5g}, {:.5g})'.format(
+            print('{:.5g},{:.5g},{:.5g},{:.5g},{:.5g},{:.5g},{:.5g},{:.5g}, {:.5g}'.format(
                 pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z))
         def shutdown(self):
             pass
