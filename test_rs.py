@@ -21,12 +21,15 @@ def test_rs(cfg):
         outputs=['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
 
     class PrintRS(object):
-        def run(self, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z):
+        def run(self, image_array, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z):
+            print((image_array is None))
+            print(type(image_array))
+            print(image_array.shape)
             print('[RS] pos:({:.5g}, {:.5g}, {:.5g}) vel:({:.5g}, {:.5g}, {:.5g}) acc:({:.5g}, {:.5g}, {:.5g})'.format(
                 pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z))
         def shutdown(self):
             pass
-    V.add(PrintRS(), inputs=['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
+    V.add(PrintRS(), inputs=['image_array', 'pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
 
 
 
