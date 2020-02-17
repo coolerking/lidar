@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 import math
+import numpy as np
 import donkeycar as dk
 
 
@@ -19,6 +20,20 @@ def test_rs(cfg):
             pass
     V.add(Split(), inputs=['pos', 'vel', 'acc'],
         outputs=['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
+
+    class ImageNoneCheck(object):
+        def __init__(self, cfg):
+            self.cfg = cfg
+        def run(self, image_array):
+            if image_array is None:
+                print('[RS] image_array is None')
+                return np.zeros((self.cfg.IMAGE_H, self.cfg.IMAGE_W, self.cfg.IMAGE_DEPTH), dtype=np.uint8)
+            else:
+                print('[RS] image.shape:{}'.format(str(image_array.shape)))
+                return image_array
+        def shutdown(self):
+            pass
+    V.add(ImageNoneCheck(cfg), inputs=['image_array'], outputs=['image_array'])
 
     class PrintRS(object):
         def run(self, image_array, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z):
