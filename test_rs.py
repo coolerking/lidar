@@ -22,10 +22,8 @@ def test_rs(cfg):
 
     class PrintRS(object):
         def run(self, pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z):
-            print('[RS] pos:({}, {}, {}) vel:({}, {}, {}) acc:({}, {}, {})'.format(
-                str(pos_x), str(pos_y), str(pos_z),
-                str(vel_x), str(vel_y), str(vel_z),
-                str(acc_x), str(acc_y), str(acc_z)))
+            print('[RS] pos:({:.5g}, {:.5g}, {:.5g}) vel:({:.5g}, {:.5g}, {:.5g}) acc:({:.5g}, {:.5g}, {:.5g})'.format(
+                pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, acc_x, acc_y, acc_z))
         def shutdown(self):
             pass
     V.add(PrintRS(), inputs=['pos_x', 'pos_y', 'pos_z', 'vel_x', 'vel_y', 'vel_z', 'acc_x', 'acc_y', 'acc_z'])
@@ -38,13 +36,13 @@ def test_rs(cfg):
             'pos_x', 'pos_y', 'pos_z',
             'vel_x', 'vel_y', 'vel_z',
             'acc_x', 'acc_y', 'acc_z', 
-            'rad']
+        ]
 
     types=['image_array',
            'float', 'float', 'float',
            'float', 'float', 'float',
            'float', 'float', 'float',
-           'float']
+        ]
 
     from donkeycar.parts.datastore import TubHandler
     th = TubHandler(path=cfg.DATA_PATH)
