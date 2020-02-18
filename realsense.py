@@ -229,7 +229,7 @@ if __name__ == "__main__":
     """
     疎通確認用処理
     """
-    c = RealSenseT265(debug=True)
+    c = RealSenseT265(image_output=True, debug=True)
     while True:
         c.run(0.0)
         time.sleep(0.1)
