@@ -9,9 +9,13 @@ Donkeycarのcam/image_arrayの代替として使用することはできない�
 """
 import time
 import logging
-
+import math as m
 import numpy as np
-import pyrealsense2 as rs
+try:
+    import pyrealsense2 as rs
+except:
+    print('[RealSenseT265] This module requires pyrealsense2 package!')
+    raise
 
 class RealSenseT265:
     '''
