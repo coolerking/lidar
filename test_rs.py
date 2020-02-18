@@ -95,7 +95,7 @@ def test_rs2(cfg):
             'acc_x', 'acc_y', 'acc_z',
             'roll', 'pitch', 'yaw',
             'image_array'],
-        threaded=False)
+        threaded=True)
 
 
     inputs=['image_array',
