@@ -86,6 +86,7 @@ class RealSenseT265:
             data = pose.get_pose_data()
             print(type(data))
             print(data)
+            print(data.__dict__)
             self.pos = (data.translation.x, data.translation.y, data.translation.z)
             self.vel = (data.velocity.x, data.velocity.y, data.velocity.z)
             self.acc = (data.acceleration.x, data.acceleration.y, data.acceleration.z)
