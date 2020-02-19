@@ -87,25 +87,30 @@ def test_rs2(cfg):
     print('Use original T265 part class')
     V = dk.vehicle.Vehicle()
     V.mem['enc_vel_ms'] = 0.0
-    from realsense import RealSenseT265
-    V.add(RealSenseT265(image_output=True, debug=True),
-        inputs=['enc_vel_ms'],
+    from realsense2 import T265
+    V.add(T265(image_output=True, debug=True),
         outputs=['pos_x', 'pos_y', 'pos_z',
             'vel_x', 'vel_y', 'vel_z',
+            'gyr_x', 'gyr_y', 'gyr_z',
             'acc_x', 'acc_y', 'acc_z',
+            'gyr_ax', 'gyr_ay', 'gyr_az',
+            'rot_i', 'rot_j', 'rot_k', 'rot_l',
+            'posemap_conf', 'pose_conf',
             'roll', 'pitch', 'yaw',
-            'image_array'],
+            'left_image_array', 'right_image_array'],
         threaded=True)
 
 
-    inputs=['image_array',
+    inputs=['left_image_array',
             'pos_x', 'pos_y', 'pos_z',
             'vel_x', 'vel_y', 'vel_z',
             'acc_x', 'acc_y', 'acc_z',
+            'gyr_x', 'gyr_y', 'gyr_z',
             'roll', 'pitch', 'yaw',
         ]
 
     types=['image_array',
+           'float', 'float', 'float',
            'float', 'float', 'float',
            'float', 'float', 'float',
            'float', 'float', 'float',
@@ -128,5 +133,9 @@ def test_rs2(cfg):
 
 if __name__ == '__main__':
     cfg = dk.load_config()
-    #test_rs(cfg)
-    test_rs2(cfg)
+    try:
+        from realsense2 import T265
+        test_rs2(cfg)
+    except:
+        print('Use donkeycar RS_265 class instead of original T265 class') 
+        test_rs(cfg)

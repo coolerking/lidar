@@ -22,7 +22,7 @@ except:
     print('[RealSenseT265] This module requires pyrealsense2 package!')
     raise
 
-class RealSenseT265:
+class T265:
     '''
     The Intel Realsense T265 camera is a device which uses an imu, twin fisheye cameras,
     and an Movidius chip to do sensor fusion and emit a world space coordinate frame that 
@@ -55,14 +55,22 @@ class RealSenseT265:
 
         # 要求された校正でストリーミング開始
         self.pipe.start(cfg)
+
+        # スレッド開始
         self.running = True
         
         zero_vec = (0.0, 0.0, 0.0)
         self.pos = zero_vec
         self.vel = zero_vec
         self.acc = zero_vec
+        self.e_vel = zero_vec
+        self.e_acc = zero_vec
+        self.rot = (0.0, 0.0, 0.0, 0.0)
         self.ang = zero_vec
-        self.img = None
+        self.posemap_conf = 0x0 # 失敗
+        self.pose_conf = 0x0 # 失敗
+        self.left_img = None
+        self.right_img = None
 
     def poll(self):
         try:
@@ -76,7 +84,10 @@ class RealSenseT265:
         if self.image_output:
             # 左魚眼ガメラからイメージを取得する
             left = frames.get_fisheye_frame(1)
-            self.img = np.asanyarray(left.get_data())
+            self.left_img = np.asanyarray(left.get_data())
+            # 右魚眼ガメラからイメージを取得する
+            right = frames.get_fisheye_frame(2)
+            self.left_img = np.asanyarray(right.get_data())
 
 
         # 位置情報フレームをフェッチ
@@ -87,24 +98,48 @@ class RealSenseT265:
             print(type(data))
             print(data)
             print(vars(data))
+            # 位置座標
             self.pos = (data.translation.x, data.translation.y, data.translation.z)
+            # 速度
             self.vel = (data.velocity.x, data.velocity.y, data.velocity.z)
+            # 加速度
             self.acc = (data.acceleration.x, data.acceleration.y, data.acceleration.z)
+            # 角速度
+            self.e_vel = (data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z)
+            # 角加速度
+            self.e_acc = (data.angular_acceleration.x, data.angular_acceleration.y, data.angular_acceleration.z)
             # 四元数
-            w = data.rotation.w
-            x = -data.rotation.z
-            y = data.rotation.x
-            z = -data.rotation.y
-            # Eular Angle
-            roll  =  m.atan2(2.0 * (w*x + y*z), w*w - x*x - y*y + z*z) * 180.0 / m.pi
-            pitch =  -m.asin(2.0 * (x*z - w*y)) * 180.0 / m.pi
-            yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi
-            self.ang = (roll, pitch, yaw)
+            self.rot = (data.rotation.w, -data.rotation.z, data.rotation.x, -data.rotation.y)
+            # オイラー角
+            self.ang = self.get_eular_angle()
+            # マップ信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            self.posemap_conf = data.mapper_confidence
+            # 位置座標信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            self.pose_conf = data.tracker_confidence
             logging.debug('[RealSenseT265] poll() pos(%f, %f, %f)' % (self.pos[0], self.pos[1], self.pos[2]))
-            logging.debug('[RealSenseT265] poll() ang(%f, %f, %f)' % (self.ang[0], self.ang[1], self.ang[2]))
+            #logging.debug('[RealSenseT265] poll() ang(%f, %f, %f)' % (self.ang[0], self.ang[1], self.ang[2]))
             if self.debug:
                 print('[RealSenseT265] poll() pos(%f, %f, %f)' % (self.pos[0], self.pos[1], self.pos[2]))
+                print('[RealSenseT265] poll() vel(%f, %f, %f)' % (self.vel[0], self.vel[1], self.vel[2]))
                 print('[RealSenseT265] poll() ang(%f, %f, %f)' % (self.ang[0], self.ang[1], self.ang[2]))
+                print('[RealSenseT265] poll() rot(%f, %f, %f, %f)' % (self.rot[0], self.rot[1], self.rot[2], self.rot[3]))
+                print('[RealSenseT265] poll() eular vel(%f, %f, %f)' % (self.e_vel[0], self.e_vel[1], self.e_vel[2]))
+                print('[RealSenseT265] poll() eular acc(%f, %f, %f)' % (self.e_acc[0], self.e_acc[1], self.e_acc[2]))
+                print('[RealSenseT265] poll() conf map:%d pose:%d' % (self.posemap_conf, self.pose_conf))
+                print('[RealSenseT265] poll() left is None:{} right is None:{}'.format(str(self.left_img is None), str(self.right_img is None)))
+    def get_eular_angle(self):
+        """
+        インスタンス変数 `self.rot` （四元数）から姿勢角速度を算出する。
+        引数：
+            なし
+        戻り値：
+            (roll, pitch, yaw)  初期位置を基準としたオイラー角（ラジアン）
+        """
+        w, x, y, z = self.rot[0], self.rot[1], self.rot[2], self.rot[3]
+        roll  =  m.atan2(2.0 * (w*x + y*z), w*w - x*x - y*y + z*z) * 180.0 / m.pi
+        pitch =  -m.asin(2.0 * (x*z - w*y)) * 180.0 / m.pi
+        yaw   =  m.atan2(2.0 * (w*z + x*y), w*w + x*x - y*y - z*z) * 180.0 / m.pi
+        return (roll, pitch, yaw)
 
     def update(self):
         """
@@ -123,49 +158,84 @@ class RealSenseT265:
         """
         パーツクラスTemplate Methodのひとつ。threadedが真である場合、
         run()のかわりに呼び出される。
+        T265で取得可能なすべての最新センサデータを返却する。
+        最新センサデータは本メソッド実行時に取得していない（別スレッド
+        により更新）。
         引数：
             なし
         戻り値：
-            pos_x       位置情報X軸
-            pos_y       位置情報Y軸
-            pos_z       位置情報Z軸
-            vel_x       速度X軸
-            vel_y       速度Y軸
-            vel_z       速度Z軸
-            acc_x       加速度X軸
-            acc_y       加速度Y軸
-            acc_z       加速度Z軸
-            ang_x       Eular Angle X軸(ロール)
-            ang_y       Eular Angle Y軸(ピッチ)
-            ang_z       Eular Angle Z軸(ヨー)
-            image_array 左カメライメージ(nd.array型、(800,848)形式)
+            pos_x               位置情報X軸（単位：メートル）
+            pos_y               位置情報Y軸（単位：メートル）
+            pos_z               位置情報Z軸（単位：メートル）
+            vel_x               速度X軸（単位：メートル/秒）
+            vel_y               速度Y軸（単位：メートル/秒）
+            vel_z               速度Z軸（単位：メートル/秒）
+            e_vel_x             角速度X軸、gyr_xに相当（単位：ラジアン/秒）
+            e_vel_y             角速度Y軸、gyr_yに相当（単位：ラジアン/秒）
+            e_vel_z             角速度Z軸、gyr_zに相当（単位：ラジアン/秒）
+            acc_x               加速度X軸（単位：メートル/秒^2）
+            acc_y               加速度Y軸（単位：メートル/秒^2）
+            acc_z               加速度Z軸（単位：メートル/秒^2）
+            e_acc_x             角加速度X軸（単位：ラジアン/秒^2）
+            e_acc_y             角加速度Y軸（単位：ラジアン/秒^2）
+            e_acc_z             角加速度Z軸（単位：ラジアン/秒^2）
+            rot_i               四元数(Qi)
+            rot_j               四元数(Qj)
+            rot_k               四元数(Qk)
+            rot_l               四元数(Ql)
+            ang_x               オイラー角X軸(ロール)（単位：ラジアン）
+            ang_y               オイラー角Y軸(ピッチ)（単位：ラジアン）
+            ang_z               オイラー角Z軸(ヨー)（単位：ラジアン）
+            posemap_conf        poseマップ信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            pose_conf           pose信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            left_image_array    左カメライメージ(nd.array型、(800,848)形式)
+            right_image_array   右カメライメージ(nd.array型、(800,848)形式)
         """
         return self.pos[0], self.pos[1], self.pos[2], \
             self.vel[0], self.vel[1], self.vel[2], \
+            self.e_vel[0], self.e_vel[1], self.e_vel[2], \
             self.acc[0], self.acc[1], self.acc[2], \
+            self.e_acc[0], self.e_acc[1], self.e_acc[2], \
+            self.rot[0], self.rot[1], self.rot[2], self.rot[3], \
+            self.posemap_conf, self.pose_conf , \
             self.ang[0], self.ang[1], self.ang[2], \
-            self.img
+            self.left_img, self.right_img
 
     def run(self):
         """
         パーツクラスTemplate Methodのひとつ。threadedが偽である場合、
         run_threaded()のかわりに呼び出される。
+        T265で取得可能なすべての最新センサデータ（本メソッド呼び出し時
+        に取得）を返却する。
         引数：
             なし
         戻り値：
-            pos_x       位置情報X軸
-            pos_y       位置情報Y軸
-            pos_z       位置情報Z軸
-            vel_x       速度X軸
-            vel_y       速度Y軸
-            vel_z       速度Z軸
-            acc_x       加速度X軸
-            acc_y       加速度Y軸
-            acc_z       加速度Z軸
-            ang_x       Eular Angle X軸(ロール)
-            ang_y       Eular Angle Y軸(ピッチ)
-            ang_z       Eular Angle Z軸(ヨー)
-            image_array 左カメライメージ(nd.array型、(800,848)形式)
+            pos_x               位置情報X軸（単位：メートル）
+            pos_y               位置情報Y軸（単位：メートル）
+            pos_z               位置情報Z軸（単位：メートル）
+            vel_x               速度X軸（単位：メートル/秒）
+            vel_y               速度Y軸（単位：メートル/秒）
+            vel_z               速度Z軸（単位：メートル/秒）
+            e_vel_x             角速度X軸、gyr_xに相当（単位：ラジアン/秒）
+            e_vel_y             角速度Y軸、gyr_yに相当（単位：ラジアン/秒）
+            e_vel_z             角速度Z軸、gyr_zに相当（単位：ラジアン/秒）
+            acc_x               加速度X軸（単位：メートル/秒^2）
+            acc_y               加速度Y軸（単位：メートル/秒^2）
+            acc_z               加速度Z軸（単位：メートル/秒^2）
+            e_acc_x             角加速度X軸（単位：ラジアン/秒^2）
+            e_acc_y             角加速度Y軸（単位：ラジアン/秒^2）
+            e_acc_z             角加速度Z軸（単位：ラジアン/秒^2）
+            rot_i               四元数(Qi)
+            rot_j               四元数(Qj)
+            rot_k               四元数(Qk)
+            rot_l               四元数(Ql)
+            ang_x               オイラー角X軸(ロール)（単位：ラジアン）
+            ang_y               オイラー角Y軸(ピッチ)（単位：ラジアン）
+            ang_z               オイラー角Z軸(ヨー)（単位：ラジアン）
+            posemap_conf        poseマップ信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            pose_conf           pose信頼度：0x0-失敗、0x1-低、0x2-中、0x3-高
+            left_image_array    左カメライメージ(nd.array型、(800,848)形式)
+            right_image_array   右カメライメージ(nd.array型、(800,848)形式)
         """
         self.poll()
         return self.run_threaded()
@@ -184,9 +254,8 @@ class RealSenseT265:
         self.pipe.stop()
 
 
-
 if __name__ == "__main__":
-    c = RealSenseT265(image_output=True, debug=True)
+    c = T265(image_output=True, debug=True)
     while True:
         c.run()
         #print(pos)
