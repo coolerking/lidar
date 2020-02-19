@@ -113,7 +113,7 @@ def test_rs2(cfg):
                 return image_array
         def shutdown(self):
             pass
-    img_chk = ImageNoneCheck()
+    img_chk = ImageNoneCheck(cfg)
     V.add(img_chk, inputs=['left_image_array'], outputs=['left_image_array'])
     V.add(img_chk, inputs=['right_image_array'], outputs=['right_image_array'])
 
