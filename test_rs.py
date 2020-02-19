@@ -88,7 +88,7 @@ def test_rs2(cfg):
     V = dk.vehicle.Vehicle()
     V.mem['enc_vel_ms'] = 0.0
     from realsense2 import T265
-    V.add(T265(image_output=True, debug=True),
+    V.add(T265(image_output=True, debug=False),
         outputs=['pos_x', 'pos_y', 'pos_z',
             'vel_x', 'vel_y', 'vel_z',
             'gyr_x', 'gyr_y', 'gyr_z',
@@ -100,6 +100,29 @@ def test_rs2(cfg):
             'left_image_array', 'right_image_array'],
         threaded=True)
 
+
+    class PrintT265:
+        def __init__(self):
+            print('pos_x,pos_y,pos_z,vel_x,vel_y,vel_z,gyr_x,gyr_y,gyr_z,acc_x,acc_y,acc_z,gyr_ax,gyr_ay,gyr_az,rot_i,rot_j,rot_k,rot_l,posemap_conf,pose_conf,roll,pitch,yaw')
+        def run(self, pos_x, pos_y, pos_z,
+        vel_x, vel_y, vel_z, 
+        gyr_x, gyr_y, gyr_z, 
+        acc_x, acc_y, acc_z, 
+        gyr_ax, gyr_ay, gyr_az, 
+        rot_i, rot_j, rot_k, rot_l, 
+        posemap_conf, pose_conf, 
+        roll, pitch, yaw):
+            print('%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d,%d,%f,%f,%f' % (pos_x, pos_y, pos_z, vel_x, vel_y, vel_z, gyr_x, gyr_y, gyr_z, acc_x, acc_y, acc_z, gyr_ax, gyr_ay, gyr_az, rot_i, rot_j, rot_k, rot_l, posemap_conf, pose_conf, roll, pitch, yaw))
+        def shutdown(self):
+            pass
+    V.add(PrintT265(),inputs=['pos_x', 'pos_y', 'pos_z',
+            'vel_x', 'vel_y', 'vel_z',
+            'gyr_x', 'gyr_y', 'gyr_z',
+            'acc_x', 'acc_y', 'acc_z',
+            'gyr_ax', 'gyr_ay', 'gyr_az',
+            'rot_i', 'rot_j', 'rot_k', 'rot_l',
+            'posemap_conf', 'pose_conf',
+            'roll', 'pitch', 'yaw'])
 
     inputs=['left_image_array',
             'pos_x', 'pos_y', 'pos_z',
