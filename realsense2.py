@@ -95,9 +95,6 @@ class T265:
 
         if pose:
             data = pose.get_pose_data()
-            print(type(data))
-            print(data)
-            print(vars(data))
             # 位置座標
             self.pos = (data.translation.x, data.translation.y, data.translation.z)
             # 速度
