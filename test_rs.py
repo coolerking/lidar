@@ -134,9 +134,12 @@ def test_rs2(cfg):
 if __name__ == '__main__':
     cfg = dk.load_config()
     try:
+        print('start')
         from realsense2 import T265
+    except:
+        print('Use donkeycar RS_265 class instead of original T265 class') 
+        test_rs(cfg)
+    else:
         test_rs2(cfg)
-    except e:
-        raise e
-        #print('Use donkeycar RS_265 class instead of original T265 class') 
-        #test_rs(cfg)
+    finally:
+        print('done')
