@@ -87,7 +87,7 @@ def test_rs2(cfg):
     print('Use original T265 part class')
     V = dk.vehicle.Vehicle()
     V.mem['enc_vel_ms'] = 0.0
-    from .realsense2 import T265
+    from realsense2 import T265
     V.add(T265(image_output=True, debug=True),
         outputs=['pos_x', 'pos_y', 'pos_z',
             'vel_x', 'vel_y', 'vel_z',
@@ -134,8 +134,9 @@ def test_rs2(cfg):
 if __name__ == '__main__':
     cfg = dk.load_config()
     try:
-        from .realsense2 import T265
+        from realsense2 import T265
         test_rs2(cfg)
-    except:
-        print('Use donkeycar RS_265 class instead of original T265 class') 
-        test_rs(cfg)
+    except e:
+        raise e
+        #print('Use donkeycar RS_265 class instead of original T265 class') 
+        #test_rs(cfg)
