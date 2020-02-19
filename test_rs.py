@@ -100,6 +100,22 @@ def test_rs2(cfg):
             'left_image_array', 'right_image_array'],
         threaded=True)
 
+    # image shape (800, 848)
+    class ImageNoneCheck(object):
+        def __init__(self, cfg):
+            self.cfg = cfg
+        def run(self, image_array):
+            if image_array is None:
+                #print('[RS] image_array is None')
+                return np.zeros((self.cfg.IMAGE_H, self.cfg.IMAGE_W, self.cfg.IMAGE_DEPTH), dtype=np.uint8)
+            else:
+                #print('[RS] image.shape:{}'.format(str(image_array.shape)))
+                return image_array
+        def shutdown(self):
+            pass
+    img_chk = ImageNoneCheck()
+    V.add(img_chk, inputs=['left_image_array'], outputs=['left_image_array'])
+    V.add(img_chk, inputs=['right_image_array'], outputs=['right_image_array'])
 
     class PrintT265:
         def __init__(self):
