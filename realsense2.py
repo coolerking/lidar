@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 Donkeycar用Intel RealSense T265 トラッキングカメラパーツクラス。
-カメラ画像をVehicleフレームワーク上で使用する場合は、image_outputを
-真にしてコンストラクタを呼び出す。
-ただしイメージ配列は(800,848)形式のnd.array型であり、そのままでは
-Donkeycarのcam/image_arrayの代替として使用することはできないことに注意。
-要librealsenseインストール(ビルド時要-DBUILD_PYTHON_BINDINGS:bool=true)。
+Donkeycar v3.1.1 realsense2.py を書き換えたもの。
+本コードもMITライセンス準拠とする。
+
+1. donkeycar v3.1.1 をインストール
+   https://github.com/autorope/donkeycar
+2. librealsense をpythonラッパオプション付きでインストール
+   https://github.com/IntelRealSense/librealsense
+3. シャットダウンしT265をUSB(3.0推奨)接続してから再起動
+4. 本コードを配置
+5. manage.pyを修正
 """
 import time
 import logging
@@ -79,6 +84,8 @@ class RealSenseT265:
 
         if pose:
             data = pose.get_pose_data()
+            print(type(data))
+            priint(data)
             self.pos = (data.translation.x, data.translation.y, data.translation.z)
             self.vel = (data.velocity.x, data.velocity.y, data.velocity.z)
             self.acc = (data.acceleration.x, data.acceleration.y, data.acceleration.z)
