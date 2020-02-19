@@ -87,7 +87,7 @@ class T265:
             self.left_img = np.asanyarray(left.get_data())
             # 右魚眼ガメラからイメージを取得する
             right = frames.get_fisheye_frame(2)
-            self.left_img = np.asanyarray(right.get_data())
+            self.right_img = np.asanyarray(right.get_data())
 
 
         # 位置情報フレームをフェッチ
